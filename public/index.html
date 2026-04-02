@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚡ Hogwarts — Jogo dos 10 Erros</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a84c;
+      --dark-gold: #8a6e2f;
+      --parchment: #f5e6c8;
+      --dark-parchment: #e8d5a3;
+      --ink: #2c1810;
+      --dark-bg: #110a03;
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'IM Fell English', serif;
+      background: var(--dark-bg);
+      color: var(--parchment);
+      overflow-x: hidden;
+    }
+
+    /* ── Stars ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at  8% 12%, rgba(255,255,255,.55) 0%, transparent 100%),
+        radial-gradient(1px 1px at 22% 48%, rgba(255,255,255,.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 47% 22%, rgba(255,255,255,.50) 0%, transparent 100%),
+        radial-gradient(1px 1px at 63% 67%, rgba(255,255,255,.30) 0%, transparent 100%),
+        radial-gradient(1px 1px at 82%  8%, rgba(255,255,255,.60) 0%, transparent 100%),
+        radial-gradient(1px 1px at 14% 74%, rgba(255,255,255,.40) 0%, transparent 100%),
+        radial-gradient(1px 1px at 91% 83%, rgba(255,255,255,.45) 0%, transparent 100%),
+        radial-gradient(1px 1px at 38% 91%, rgba(255,255,255,.30) 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 35%, rgba(255,255,255,.35) 0%, transparent 100%),
+        radial-gradient(2px 2px at 55% 55%, rgba(255,255,255,.15) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    /* ── Pages ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── Header ── */
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(22px, 5vw, 36px);
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 4px;
+      text-shadow: 0 0 24px rgba(201,168,76,.45);
+    }
+    .logo-sub {
+      font-style: italic;
+      font-size: 14px;
+      color: var(--dark-parchment);
+      opacity: .8;
+      margin-top: 4px;
+    }
+    .divider {
+      text-align: center;
+      color: var(--gold);
+      letter-spacing: 10px;
+      opacity: .6;
+      margin: 10px 0 18px;
+    }
+
+    /* ── Card / scroll ── */
+    .card {
+      background: linear-gradient(135deg,#1e1005 0%,#140b02 60%,#1e1005 100%);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 24px 22px;
+      margin-bottom: 18px;
+      box-shadow: inset 0 0 40px rgba(201,168,76,.04), 0 6px 24px rgba(0,0,0,.5);
+      position: relative;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(201,168,76,.15);
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    /* ── Forms ── */
+    label {
+      display: block;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      margin: 16px 0 6px;
+    }
+    label:first-child { margin-top: 0; }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      background: rgba(0,0,0,.45);
+      border: 1px solid rgba(201,168,76,.35);
+      border-radius: 5px;
+      padding: 10px 14px;
+      color: var(--parchment);
+      font-family: 'IM Fell English', serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 8px rgba(201,168,76,.2);
+    }
+
+    /* ── House buttons ── */
+    .house-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .house-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 12px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      transition: all .2s;
+      background: none;
+    }
+    .house-btn.gryffindor  { border-color:rgba(116,0,1,.6);   color:#ffb3b3; background:rgba(116,0,1,.25); }
+    .house-btn.slytherin   { border-color:rgba(26,71,42,.6);  color:#9dffc9; background:rgba(26,71,42,.25); }
+    .house-btn.ravenclaw   { border-color:rgba(14,26,64,.7);  color:#99b3ff; background:rgba(14,26,64,.3); }
+    .house-btn.hufflepuff  { border-color:rgba(236,185,57,.4);color:#ffe066; background:rgba(236,185,57,.15); }
+
+    .house-btn.selected.gryffindor  { background:rgba(116,0,1,.6);  border-color:#ff7070; }
+    .house-btn.selected.slytherin   { background:rgba(26,71,42,.65); border-color:#4dff91; }
+    .house-btn.selected.ravenclaw   { background:rgba(14,26,64,.7);  border-color:#6699ff; }
+    .house-btn.selected.hufflepuff  { background:rgba(236,185,57,.45);border-color:#ecb939; }
+
+    /* ── Buttons ── */
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      padding: 13px;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all .2s;
+      text-transform: uppercase;
+      margin-top: 14px;
+    }
+    .btn:hover  { filter:brightness(1.15); transform:translateY(-1px); }
+    .btn:active { transform:translateY(0); }
+    .btn-gold   { background:linear-gradient(135deg,#7a5f25,var(--gold),#7a5f25); color:var(--ink); }
+    .btn-green  { background:linear-gradient(135deg,#0a3a0a,#1a6b1a,#0a3a0a); color:#ccffcc; margin-top:10px; }
+    .btn-red    { background:linear-gradient(135deg,#5a0a0a,#8b1111,#5a0a0a); color:#ffcccc; margin-top:10px; }
+    .btn-outline {
+      background:transparent;
+      border:1px solid var(--gold);
+      color:var(--gold);
+      padding:9px 20px;
+      width:auto;
+      margin-top:0;
+      font-size:11px;
+    }
+    .btn-outline:hover { background:rgba(201,168,76,.1); filter:none; transform:none; }
+
+    .error-msg {
+      color:#ff8080;
+      font-size:13px;
+      margin-top:10px;
+      text-align:center;
+      font-style:italic;
+      min-height:18px;
+    }
+
+    /* ── Section title ── */
+    .sec-title {
+      font-family:'Cinzel',serif;
+      font-size:12px;
+      font-weight:600;
+      color:var(--gold);
+      letter-spacing:2px;
+      margin-bottom:12px;
+      padding-bottom:8px;
+      border-bottom:1px solid rgba(201,168,76,.2);
+    }
+
+    /* ── Players list ── */
+    .players-list { list-style:none; }
+    .player-item {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:9px 12px;
+      border-bottom:1px solid rgba(201,168,76,.08);
+      font-size:14px;
+    }
+    .player-item:last-child { border-bottom:none; }
+
+    /* ── Badges ── */
+    .badge {
+      font-family:'Cinzel',serif;
+      font-size:10px;
+      font-weight:600;
+      letter-spacing:1px;
+      padding:2px 8px;
+      border-radius:10px;
+    }
+    .badge-Grifinória { background:rgba(116,0,1,.45);  color:#ffb3b3; border:1px solid rgba(116,0,1,.7); }
+    .badge-Sonserina  { background:rgba(26,71,42,.45); color:#9dffc9; border:1px solid rgba(26,71,42,.7); }
+    .badge-Corvinal  { background:rgba(14,26,64,.5);  color:#99b3ff; border:1px solid rgba(14,26,64,.8); }
+    .badge-Lufa-Lufa { background:rgba(236,185,57,.25);color:#ffe066; border:1px solid rgba(236,185,57,.5); }
+    .badge-master { background:rgba(201,168,76,.2); color:var(--gold); border:1px solid rgba(201,168,76,.5); }
+
+    /* ── Waiting dots ── */
+    .dots { display:flex; justify-content:center; gap:6px; margin:16px 0; }
+    .dot  { width:8px; height:8px; border-radius:50%; background:var(--gold); animation:bounce 1.4s ease-in-out infinite; }
+    .dot:nth-child(2) { animation-delay:.2s; }
+    .dot:nth-child(3) { animation-delay:.4s; }
+    @keyframes bounce {
+      0%,80%,100% { transform:scale(.6); opacity:.4; }
+      40%         { transform:scale(1);  opacity:1;  }
+    }
+
+    /* ── Game layout ── */
+    .status-bar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:8px 14px;
+      background:rgba(0,0,0,.4);
+      border:1px solid rgba(201,168,76,.2);
+      border-radius:6px;
+      margin-bottom:10px;
+      font-size:12px;
+      font-family:'Cinzel',serif;
+      letter-spacing:1px;
+      flex-wrap:wrap;
+      gap:6px;
+    }
+    .status-bar .gold { color:var(--gold); }
+
+    .progress-bar {
+      background:rgba(0,0,0,.4);
+      border:1px solid rgba(201,168,76,.25);
+      border-radius:20px;
+      height:26px;
+      overflow:hidden;
+      margin-bottom:10px;
+    }
+    .progress-fill {
+      height:100%;
+      background:linear-gradient(90deg,#7a5f25,var(--gold));
+      border-radius:20px;
+      transition:width .4s ease;
+      display:flex;
+      align-items:center;
+      padding-left:12px;
+      min-width:0;
+    }
+    .progress-text {
+      font-family:'Cinzel',serif;
+      font-size:11px;
+      font-weight:700;
+      color:var(--ink);
+      letter-spacing:1px;
+      white-space:nowrap;
+    }
+
+    .hint { text-align:center; font-style:italic; font-size:13px; color:rgba(201,168,76,.6); margin:6px 0 10px; }
+
+    .images-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:14px;
+    }
+    @media(max-width:600px) { .images-grid { grid-template-columns:1fr; } }
+
+    .img-wrap {
+      position:relative;
+      border:1px solid rgba(201,168,76,.35);
+      border-radius:6px;
+      overflow:hidden;
+      background:#000;
+      user-select:none;
+    }
+    .img-wrap img {
+      width:100%;
+      height:auto;
+      display:block;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+    .img-label {
+      position:absolute;
+      top:6px; left:6px;
+      background:rgba(0,0,0,.82);
+      color:var(--gold);
+      font-family:'Cinzel',serif;
+      font-size:10px;
+      letter-spacing:1px;
+      padding:3px 8px;
+      border-radius:4px;
+      border:1px solid rgba(201,168,76,.3);
+    }
+    #img-right { cursor:crosshair; }
+
+    /* Click markers */
+    .marker {
+      position:absolute;
+      width:34px; height:34px;
+      border-radius:50%;
+      border:2px solid #ffeb3b;
+      background:rgba(255,235,59,.18);
+      transform:translate(-50%,-50%);
+      pointer-events:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      font-family:'Cinzel',serif;
+      font-weight:700;
+      color:#ffeb3b;
+      animation:pop .3s ease-out;
+    }
+    .marker.ok { border-color:#5fff5f; background:rgba(95,255,95,.18); color:#5fff5f; }
+    @keyframes pop {
+      from { transform:translate(-50%,-50%) scale(.4); opacity:0; }
+      to   { transform:translate(-50%,-50%) scale(1);  opacity:1; }
+    }
+
+    /* ── Scoreboard ── */
+    .score-item {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:8px 10px;
+      border-bottom:1px solid rgba(201,168,76,.08);
+      font-size:13px;
+    }
+    .score-item:last-child { border-bottom:none; }
+    .score-count { color:var(--gold); font-weight:600; font-family:'Cinzel',serif; }
+    .score-clicks { color:rgba(201,168,76,.5); font-size:11px; margin-left:6px; }
+
+    /* ── Master panel tabs ── */
+    .tabs { display:flex; gap:2px; border-bottom:1px solid rgba(201,168,76,.2); margin-bottom:14px; }
+    .tab-btn {
+      font-family:'Cinzel',serif;
+      font-size:11px;
+      letter-spacing:1px;
+      padding:8px 14px;
+      background:none;
+      border:none;
+      border-bottom:2px solid transparent;
+      color:rgba(201,168,76,.45);
+      cursor:pointer;
+      transition:all .2s;
+      margin-bottom:-1px;
+    }
+    .tab-btn.active, .tab-btn:hover { color:var(--gold); }
+    .tab-btn.active { border-bottom-color:var(--gold); }
+    .tab-pane { display:none; }
+    .tab-pane.active { display:block; }
+
+    /* Click log */
+    .click-row {
+      padding:8px 10px;
+      border-bottom:1px solid rgba(201,168,76,.08);
+      font-size:12px;
+    }
+    .click-row:last-child { border-bottom:none; }
+    .ok-dot  { color:#5fff5f; margin-right:4px; }
+    .err-dot { color:#ff6060; margin-right:4px; }
+
+    /* Master panel wrapper */
+    .master-panel {
+      background:rgba(201,168,76,.04);
+      border:1px solid rgba(201,168,76,.25);
+      border-radius:6px;
+      padding:16px;
+      margin-top:16px;
+    }
+    .master-btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .master-btns .btn { flex:1; margin-top:0; min-width:140px; }
+
+    /* ── Game finished banner ── */
+    .finished-banner {
+      text-align:center;
+      padding:16px;
+      background:rgba(201,168,76,.05);
+      border:1px solid rgba(201,168,76,.3);
+      border-radius:6px;
+      margin-bottom:14px;
+    }
+
+    /* ── Winner overlay ── */
+    .overlay {
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.94);
+      z-index:200;
+      display:none;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:24px;
+    }
+    .overlay.show { display:flex; }
+
+    .fireworks { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+    .spark {
+      position:absolute;
+      width:7px; height:7px;
+      border-radius:50%;
+      animation:spark var(--dur,1.5s) ease-out var(--delay,0s) infinite;
+    }
+    @keyframes spark {
+      0%   { transform:translate(0,0) scale(1); opacity:1; }
+      100% { transform:translate(var(--dx),var(--dy)) scale(0); opacity:0; }
+    }
+
+    .w-title {
+      font-family:'Cinzel',serif;
+      font-size:clamp(28px,6vw,46px);
+      font-weight:700;
+      color:var(--gold);
+      animation:glow 1.5s ease-in-out infinite alternate;
+      margin-bottom:6px;
+    }
+    @keyframes glow {
+      from { text-shadow:0 0 16px rgba(201,168,76,.4); }
+      to   { text-shadow:0 0 40px rgba(201,168,76,1),0 0 80px rgba(201,168,76,.35); }
+    }
+    .w-sub  { font-family:'Cinzel',serif; font-size:14px; color:rgba(201,168,76,.65); letter-spacing:2px; margin-bottom:14px; }
+    .w-name { font-family:'Cinzel',serif; font-size:clamp(20px,4vw,30px); color:#fff; margin:12px 0 6px; }
+    .w-house{ font-style:italic; font-size:17px; margin-bottom:16px; }
+    .w-quote{ font-style:italic; color:var(--dark-parchment); font-size:15px; max-width:420px; line-height:1.65; opacity:.85; }
+
+    .spell-text { font-family:'Cinzel',serif; font-style:italic; color:rgba(201,168,76,.55); font-size:13px; letter-spacing:1px; margin:8px 0; }
+
+    /* ── Connection status ── */
+    .conn-dot {
+      display:inline-block;
+      width:8px; height:8px;
+      border-radius:50%;
+      background:#5fff5f;
+      margin-right:6px;
+      vertical-align:middle;
+    }
+    .conn-dot.off { background:#ff6060; }
+    .conn-label { font-family:'Cinzel',serif; font-size:11px; letter-spacing:1px; color:rgba(201,168,76,.6); }
+
+    #conn-bar { text-align:right; margin-bottom:10px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ── CONNECTION BAR ── -->
+  <div id="conn-bar" style="display:none;">
+    <span class="conn-dot" id="conn-dot"></span>
+    <span class="conn-label" id="conn-label">Conectando...</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PAGE: LOGIN
+  ══════════════════════════════════════════════════════════ -->
+  <div id="page-login" class="page active">
+    <div class="logo">
+      <div class="logo-title">✦ HOGWARTS ✦</div>
+      <div class="logo-sub">Jogo dos 10 Logos — Dinâmica de Time</div>
+    </div>
+    <div class="divider">⚡ ⚡ ⚡</div>
+
+    <div class="card">
+      <!-- Mode toggle -->
+      <div style="display:flex;gap:6px;margin-bottom:18px;background:rgba(0,0,0,.3);border-radius:6px;padding:4px;">
+        <button id="mode-player" onclick="setLoginMode('player')"
+          style="flex:1;padding:8px;border-radius:4px;border:none;cursor:pointer;font-family:'Cinzel',serif;
+                 font-size:11px;letter-spacing:1px;font-weight:600;transition:all .2s;
+                 background:var(--gold);color:var(--ink);">
+          ⚡ JOGADOR
+        </button>
+        <button id="mode-spectator" onclick="setLoginMode('spectator')"
+          style="flex:1;padding:8px;border-radius:4px;border:none;cursor:pointer;font-family:'Cinzel',serif;
+                 font-size:11px;letter-spacing:1px;font-weight:600;transition:all .2s;
+                 background:transparent;color:rgba(201,168,76,.5);">
+          👁 ESPECTADOR
+        </button>
+      </div>
+
+      <!-- Player fields -->
+      <div id="player-fields">
+        <label>Seu Nome</label>
+        <input type="text" id="inp-name" placeholder="Seu nome, bruxo..." maxlength="30" />
+
+        <div id="house-section">
+          <label>Sua Casa</label>
+          <div class="house-grid">
+            <button class="house-btn gryffindor" data-house="Grifinória" onclick="pickHouse(this)">🦁 Grifinória</button>
+            <button class="house-btn slytherin"  data-house="Sonserina"  onclick="pickHouse(this)">🐍 Sonserina</button>
+            <button class="house-btn ravenclaw"  data-house="Corvinal"  onclick="pickHouse(this)">🦅 Corvinal</button>
+            <button class="house-btn hufflepuff" data-house="Lufa-Lufa" onclick="pickHouse(this)">🦡 Lufa-Lufa</button>
+          </div>
+        </div>
+
+        <label>Senha Master <span style="font-size:10px;opacity:.6;">(deixe vazio se for jogador)</span></label>
+        <input type="password" id="inp-mpw" placeholder="Somente Dumbledore conhece..."
+               oninput="onMasterPwInput(this.value)" />
+      </div>
+
+      <!-- Spectator fields -->
+      <div id="spectator-fields" style="display:none;">
+        <p style="font-family:'IM Fell English',serif;font-style:italic;font-size:14px;
+           color:rgba(201,168,76,.7);margin-bottom:12px;text-align:center;">
+          Você assistirá ao jogo sem interferir nos resultados.
+        </p>
+        <label>Código de Espectador</label>
+        <input type="password" id="inp-spw" placeholder="Código fornecido pelo organizador..." />
+      </div>
+
+      <label>Código da Sala</label>
+      <input type="text" id="inp-room" placeholder="Código da sala" maxlength="20"
+             oninput="this.value=this.value.toUpperCase()" />
+
+      <div class="error-msg" id="login-err"></div>
+      <button class="btn btn-gold" onclick="doLogin()">✦ ENTRAR EM HOGWARTS ✦</button>
+    </div>
+    <p class="hint">Accio — que os olhos mais atentos vençam!</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PAGE: WAITING ROOM
+  ══════════════════════════════════════════════════════════ -->
+  <div id="page-waiting" class="page">
+    <div class="logo">
+      <div class="logo-title" style="font-size:clamp(18px,4vw,28px);">✦ SALA DE ESPERA ✦</div>
+      <div class="logo-sub" id="wait-sub">Aguardando Dumbledore iniciar a dinâmica...</div>
+    </div>
+    <div class="divider">⚡ ⚡ ⚡</div>
+
+    <div class="card">
+      <div class="sec-title" id="wait-room-label">Sala: —</div>
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <p class="spell-text" id="wait-spell">Aguardando Dumbledore dar o sinal de início...</p>
+      <ul class="players-list" id="players-list"></ul>
+      <div style="text-align:center;margin-top:14px;">
+        <button class="btn-outline btn" style="width:auto;font-size:11px;padding:6px 16px;margin-top:0;"
+          onclick="localStorage.removeItem('hp_session');location.reload();">
+          Sair da sala
+        </button>
+      </div>
+    </div>
+
+    <!-- Master controls (hidden for players) -->
+    <div id="master-wait" style="display:none;">
+      <div class="card">
+        <div class="sec-title">🔮 Painel do Mestre</div>
+        <p style="font-size:13px;color:rgba(201,168,76,.7);font-style:italic;margin-bottom:14px;">
+          Quando todos estiverem na sala, inicie o desafio!
+        </p>
+        <button class="btn btn-gold" onclick="masterStart()">⚡ INICIAR O DESAFIO ⚡</button>
+        <div style="text-align:center;margin-top:12px;">
+          <button class="btn-outline btn" style="width:auto;font-size:11px;padding:6px 16px;margin-top:0;"
+            onclick="localStorage.removeItem('hp_session');location.reload();">
+            Sair da sala
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PAGE: SPECTATOR
+  ══════════════════════════════════════════════════════════ -->
+  <div id="page-spectator" class="page">
+    <div class="logo">
+      <div class="logo-title" style="font-size:clamp(16px,3.5vw,24px);">👁 MODO ESPECTADOR</div>
+      <div class="logo-sub" id="spec-status">Aguardando o início do desafio...</div>
+    </div>
+    <div class="divider">⚡ ⚡ ⚡</div>
+
+    <!-- Waiting state -->
+    <div id="spec-waiting" class="card">
+      <div class="sec-title">Participantes na Sala</div>
+      <ul class="players-list" id="spec-players-list"></ul>
+      <div class="dots" style="margin-top:14px;">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <p class="spell-text">Aguardando Dumbledore iniciar o desafio...</p>
+    </div>
+
+    <!-- Playing state -->
+    <div id="spec-playing" style="display:none;">
+      <div class="card">
+        <div class="sec-title">🏆 Placar ao Vivo</div>
+        <div id="spec-scoreboard"></div>
+      </div>
+      <div class="card" style="margin-top:12px;">
+        <div class="sec-title">📊 Progresso Geral</div>
+        <div id="spec-progress-bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PAGE: GAME
+  ══════════════════════════════════════════════════════════ -->
+  <div id="page-game" class="page">
+    <div class="status-bar">
+      <span id="g-player">—</span>
+      <span class="gold" id="g-clicks">Cliques: 0</span>
+      <span id="g-found">Encontrados: 0/10</span>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="prog-fill" style="width:0%">
+        <span class="progress-text" id="prog-text">0 / 10</span>
+      </div>
+    </div>
+
+    <!-- Penalty bar — shown only when player is locked -->
+    <div id="penalty-bar" style="display:none;margin-bottom:10px;">
+      <div style="background:rgba(180,30,30,.15);border:1px solid rgba(255,80,80,.35);border-radius:6px;overflow:hidden;">
+        <div id="penalty-fill" style="height:6px;background:linear-gradient(90deg,#8b0000,#ff4444);width:100%;transition:width .1s linear;"></div>
+      </div>
+      <p id="penalty-text" style="font-family:'Cinzel',serif;font-size:12px;color:#ff8080;letter-spacing:1px;text-align:center;margin-top:5px;"></p>
+    </div>
+
+    <!-- PLAYER layout: only the modified image (full width) -->
+    <div id="player-game-area">
+      <p class="hint">Clique nos logos SI escondidos na imagem abaixo ↓</p>
+      <div class="img-wrap" id="img-right" onclick="handleClick(event)" style="max-width:700px;margin:0 auto;">
+        <div class="img-label">ENCONTRE OS ERROS</div>
+        <img src="/images/modified.webp" alt="Com erros" id="modified-img" />
+      </div>
+    </div>
+
+    <!-- MASTER layout: gabarito side-by-side with modified (injected after join) -->
+    <div id="master-game-area" style="display:none;">
+      <p class="hint">Gabarito (visível só para você, Master) ↓</p>
+      <div class="images-grid">
+        <div class="img-wrap">
+          <div class="img-label">GABARITO</div>
+          <img id="gabarito-img" src="" alt="Gabarito" />
+        </div>
+        <div class="img-wrap">
+          <div class="img-label">IMAGEM DO JOGO</div>
+          <img src="/images/modified.webp" alt="Jogo" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Banner shown only to the player who just won (private) -->
+    <div class="finished-banner" id="g-finished" style="display:none;margin-top:14px;">
+      <div style="font-size:28px;margin-bottom:6px;">⚡</div>
+      <p style="font-family:'Cinzel',serif;color:var(--gold);font-size:16px;">Você encontrou todos os erros!</p>
+      <p style="font-size:13px;color:rgba(201,168,76,.7);font-style:italic;margin-top:6px;">
+        O Master irá anunciar o vencedor em breve...</p>
+    </div>
+
+    <!-- Banner shown to ALL players when someone has completed (no name revealed) -->
+    <div class="finished-banner" id="g-pending" style="display:none;margin-top:14px;border-color:rgba(255,200,50,.4);">
+      <div style="font-size:28px;margin-bottom:6px;">🔮</div>
+      <p style="font-family:'Cinzel',serif;color:var(--gold);font-size:16px;">Temos um bruxo vencedor!</p>
+      <p style="font-size:13px;color:rgba(201,168,76,.7);font-style:italic;margin-top:6px;">
+        O Master irá anunciar quem foi em breve... aguarde!</p>
+    </div>
+
+    <!-- Master-only panel (players never see this) -->
+    <div id="master-game" style="display:none;">
+      <div class="master-panel">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="showTab('tab-score')">📊 Placar</button>
+          <button class="tab-btn"        onclick="showTab('tab-clicks')">🖱️ Cliques</button>
+        </div>
+
+        <div id="tab-score" class="tab-pane active">
+          <div class="sec-title">Classificação em Tempo Real</div>
+          <div id="scoreboard"></div>
+        </div>
+
+        <div id="tab-clicks" class="tab-pane">
+          <div class="sec-title">Histórico por Jogador</div>
+          <div id="click-log"></div>
+        </div>
+
+        <div class="master-btns">
+          <!-- Master winner preview — shows before announcing -->
+          <div id="master-winner-preview" style="display:none;width:100%;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.4);border-radius:6px;padding:12px 14px;margin-bottom:4px;"></div>
+
+          <button class="btn btn-green" id="btn-announce" onclick="masterAnnounce()" style="display:none;">
+            🏆 ANUNCIAR VENCEDOR
+          </button>
+          <button class="btn btn-red" onclick="masterReset()">🔄 REINICIAR JOGO</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- ══════════════════════════════════════════════════════════
+     GAME START TRANSITION OVERLAY
+══════════════════════════════════════════════════════════ -->
+<div class="overlay" id="start-overlay" style="background:rgba(0,0,0,.97);">
+  <div style="position:relative;z-index:2;text-align:center;padding:24px;" id="start-content">
+    <div style="font-size:64px;margin-bottom:20px;animation:float 1.5s ease-in-out infinite;">⚡</div>
+    <div id="start-countdown" style="font-family:'Cinzel',serif;font-size:clamp(60px,14vw,110px);
+         font-weight:700;color:var(--gold);text-shadow:0 0 40px rgba(201,168,76,.8);
+         animation:glow 0.8s ease-in-out infinite alternate;line-height:1;">3</div>
+    <div style="font-family:'IM Fell English',serif;font-style:italic;font-size:18px;
+         color:var(--dark-parchment);margin-top:16px;opacity:.8;" id="start-msg">
+      Que os melhores olhos vençam...
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     RANKING OVERLAY — shown after winner is revealed
+══════════════════════════════════════════════════════════ -->
+<div class="overlay" id="ranking-overlay" style="background:rgba(0,0,0,.96);overflow-y:auto;">
+  <div style="position:relative;z-index:2;width:100%;max-width:600px;padding:28px 20px;text-align:center;">
+    <div class="w-title" style="font-size:clamp(22px,4vw,32px);margin-bottom:4px;">✦ CLASSIFICAÇÃO FINAL ✦</div>
+    <p style="font-family:'IM Fell English',serif;font-style:italic;font-size:14px;
+       color:rgba(201,168,76,.6);margin-bottom:24px;">O livro dos grandes bruxos registra...</p>
+    <div id="final-ranking"></div>
+    <p style="font-family:'Cinzel',serif;font-size:11px;color:rgba(201,168,76,.35);
+       letter-spacing:2px;margin-top:24px;">
+      Aguardando Dumbledore reiniciar o jogo...
+    </p>
+  </div>
+</div>
+<div class="overlay" id="pending-overlay" style="background:rgba(0,0,0,.88);">
+  <div style="position:relative;z-index:2;text-align:center;padding:24px;">
+    <div style="font-size:56px;margin-bottom:16px;animation:float 2s ease-in-out infinite;">🔮</div>
+    <div style="font-family:'Cinzel',serif;font-size:clamp(20px,4vw,32px);font-weight:700;color:var(--gold);
+                text-shadow:0 0 24px rgba(201,168,76,.6);margin-bottom:10px;letter-spacing:3px;">
+      UM BRUXO COMPLETOU O DESAFIO!
+    </div>
+    <div style="font-family:'IM Fell English',serif;font-style:italic;font-size:17px;
+                color:var(--dark-parchment);opacity:.85;margin-bottom:8px;">
+      Dumbledore irá revelar o vencedor em breve<span id="pending-dots">...</span>
+    </div>
+    <div style="font-family:'Cinzel',serif;font-size:13px;color:rgba(201,168,76,.5);letter-spacing:2px;margin-top:18px;">
+      ✦ AGUARDE O ANÚNCIO ✦
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════════════
+     WINNER OVERLAY
+══════════════════════════════════════════════════════════ -->
+<div class="overlay" id="overlay">
+  <div class="fireworks" id="fw"></div>
+  <div style="position:relative;z-index:2;">
+    <div class="w-title">⚡ EXPELLIARMUS! ⚡</div>
+    <div class="w-sub">O GRANDE FEITICEIRO DA SALA É</div>
+    <div class="w-name" id="ov-name">—</div>
+    <div class="w-house" id="ov-house">—</div>
+    <div class="divider">✦ ✦ ✦</div>
+    <p class="w-quote" id="ov-quote"></p>
+    <button class="btn btn-outline" style="margin-top:22px;" onclick="closeOverlay()">Continuar →</button>
+  </div>
+</div>
+
+<script>
+// ── WebSocket ────────────────────────────────────────────────────────────────
+let ws = null;
+let me = { id:null, isMaster:false, found:[], totalClicks:0 };
+let gameRunning = false;
+let TOTAL_ERRORS = 8;
+
+// Penalty state
+let penaltyTimer = null;
+let penaltyEnd   = 0;
+
+const HOUSE_ICONS  = { 'Grifinória':'🦁', 'Sonserina':'🐍', 'Corvinal':'🦅', 'Lufa-Lufa':'🦡' };
+const HOUSE_NAMES  = { 'Grifinória':'Grifinória', 'Sonserina':'Sonserina', 'Corvinal':'Corvinal', 'Lufa-Lufa':'Lufa-Lufa' };
+const HOUSE_QUOTES = {
+  'Grifinória': 'A coragem não é a ausência do medo, mas o triunfo sobre ele. Grifinória triunfou! 🦁',
+  Sonserina:  'Sonserina usa todos os meios para alcançar seu destino — e hoje, o destino é a vitória! 🐍',
+  Corvinal:  'A mente Corvinal, mais afiada que qualquer espada, venceu este desafio! 🦅',
+  'Lufa-Lufa': 'A lealdade e a determinação de Lufa-Lufa guiaram este bruxo à glória! 🦡',
+};
+
+function connectWS(onOpen) {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}`);
+
+  ws.onopen = () => {
+    setConn(true);
+    if (onOpen) onOpen();
+  };
+
+  ws.onclose = () => {
+    setConn(false);
+    setTimeout(() => {
+      if (me.id) connectWS();
+    }, 2000);
+  };
+
+  ws.onmessage = (ev) => {
+    let msg;
+    try { msg = JSON.parse(ev.data); } catch { return; }
+    handleMessage(msg);
+  };
+}
+
+function sendWS(obj) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
+}
+
+function setConn(ok) {
+  document.getElementById('conn-bar').style.display = 'block';
+  document.getElementById('conn-dot').className = 'conn-dot' + (ok ? '' : ' off');
+  document.getElementById('conn-label').textContent = ok ? 'Conectado' : 'Reconectando...';
+}
+
+// ── Message handler ──────────────────────────────────────────────────────────
+function handleMessage(msg) {
+  switch (msg.type) {
+
+    case 'error':
+      document.getElementById('login-err').textContent = '⚡ ' + msg.text;
+      break;
+
+    case 'joined':
+      me.id          = msg.playerId;
+      me.isMaster    = msg.isMaster;
+      me.isSpectator = msg.isSpectator;
+      TOTAL_ERRORS   = msg.totalErrors || 10;
+      if (msg.isSpectator) { showPage('page-spectator'); break; }
+      if (msg.isMaster && msg.gabaritoToken) {
+        document.getElementById('gabarito-img').src =
+          '/images/gabarito.webp?t=' + msg.gabaritoToken;
+      }
+      localStorage.setItem('hp_session', JSON.stringify({
+        name:     document.getElementById('inp-name').value.trim(),
+        house:    getHouse() || 'Master',
+        roomId:   document.getElementById('inp-room').value.trim(),
+        mpw:      document.getElementById('inp-mpw').value,
+        isMaster: msg.isMaster,
+      }));
+      enterWaiting();
+      break;
+
+    case 'room_state':
+      refreshState(msg);
+      break;
+
+    case 'spectator_state':
+      refreshSpectatorState(msg);
+      break;
+
+    case 'game_started':
+      if (me.isSpectator) { showStartTransition(true); break; }
+      showStartTransition();
+      break;
+
+    case 'click_result':
+      handleClickResult(msg);
+      break;
+
+    case 'locked':
+      startPenaltyDisplay(msg.remaining);
+      break;
+
+    case 'winner_detected':
+      if (me.isSpectator) { spectatorShowPending(); break; }
+      if (!me.isMaster) showWinnerPending();
+      if (me.isMaster)  document.getElementById('btn-announce').style.display = 'block';
+      break;
+
+    case 'winner_ready':
+      showMasterWinnerPreview(msg.winner);
+      break;
+
+    case 'you_won':
+      break;
+
+    case 'winner_announced':
+      hidePendingOverlay();
+      if (!me.isSpectator) {
+        document.getElementById('g-pending').style.display = 'none';
+        document.getElementById('master-winner-preview').style.display = 'none';
+      }
+      if (msg.players) lastRoomPlayers = msg.players;
+      if (me.isSpectator || !me.isMaster) {
+        showWinnerTransition(msg.winner);
+      } else {
+        showWinner(msg.winner);
+      }
+      break;
+
+    case 'game_reset':
+      if (me.isSpectator) { spectatorReset(); break; }
+      resetLocal();
+      enterWaiting();
+      break;
+
+    case 'kicked':
+      localStorage.removeItem('hp_session');
+      alert('Você foi removido da sala pelo Master.');
+      location.reload();
+      break;
+  }
+}
+
+// ── Login ────────────────────────────────────────────────────────────────────
+let loginMode = 'player';
+
+function setLoginMode(mode) {
+  loginMode = mode;
+  const isSpec = mode === 'spectator';
+  document.getElementById('player-fields').style.display    = isSpec ? 'none'  : 'block';
+  document.getElementById('spectator-fields').style.display = isSpec ? 'block' : 'none';
+  const btnP = document.getElementById('mode-player');
+  const btnS = document.getElementById('mode-spectator');
+  btnP.style.background = isSpec ? 'transparent' : 'var(--gold)';
+  btnP.style.color      = isSpec ? 'rgba(201,168,76,.5)' : 'var(--ink)';
+  btnS.style.background = isSpec ? 'var(--gold)' : 'transparent';
+  btnS.style.color      = isSpec ? 'var(--ink)' : 'rgba(201,168,76,.5)';
+  document.getElementById('login-err').textContent = '';
+}
+
+function onMasterPwInput(val) {
+  const isMasterTyping = val.length > 0;
+  document.getElementById('house-section').style.display = isMasterTyping ? 'none' : 'block';
+  if (isMasterTyping) document.querySelectorAll('.house-btn').forEach(b => b.classList.remove('selected'));
+}
+
+function pickHouse(btn) {
+  document.querySelectorAll('.house-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function getHouse() {
+  const sel = document.querySelector('.house-btn.selected');
+  return sel ? sel.dataset.house : null;
+}
+
+function doLogin() {
+  const roomId = document.getElementById('inp-room').value.trim();
+  const errEl  = document.getElementById('login-err');
+  if (!roomId) { errEl.textContent = '⚡ Insira o código da sala.'; return; }
+  errEl.textContent = '';
+
+  if (loginMode === 'spectator') {
+    const spw = document.getElementById('inp-spw').value;
+    if (!spw) { errEl.textContent = '⚡ Insira o código de espectador.'; return; }
+    connectWS(() => sendWS({ type:'join', name:'Espectador', house:'Spectator', roomId, spectatorPassword: spw }));
+    return;
+  }
+
+  const name = document.getElementById('inp-name').value.trim();
+  const mpw  = document.getElementById('inp-mpw').value;
+  const house = getHouse();
+  if (!name)                  { errEl.textContent = '⚡ Por favor, insira seu nome.';   return; }
+  if (!mpw && !house)         { errEl.textContent = '⚡ Escolha sua casa de Hogwarts!'; return; }
+  connectWS(() => sendWS({ type:'join', name, house: house || 'Master', roomId, masterPassword: mpw }));
+}
+
+// ── Waiting room ─────────────────────────────────────────────────────────────
+function enterWaiting() {
+  showPage('page-waiting');
+  document.getElementById('wait-room-label').textContent =
+    'Sala: ' + document.getElementById('inp-room').value.trim();
+  document.getElementById('master-wait').style.display = me.isMaster ? 'block' : 'none';
+  if (me.isMaster) {
+    document.getElementById('wait-sub').textContent   = 'Bem-vindo, Dumbledore! A sala está sob seu comando.';
+    document.getElementById('wait-spell').textContent = 'Gerencie os participantes e inicie quando todos estiverem presentes.';
+  }
+}
+
+function refreshState(state) {
+  // Update players list
+  const list = document.getElementById('players-list');
+  list.innerHTML = state.players.map(p => {
+    const icon = HOUSE_ICONS[p.house] || '';
+    const masterTag = p.isMaster ? '<span class="badge badge-master">Master ✦</span>' : '';
+    return `<li class="player-item">
+      <span class="badge badge-${p.house}">${icon} ${p.house}</span>
+      <span style="flex:1;">${p.name}</span>
+      ${masterTag}
+    </li>`;
+  }).join('');
+
+  // Update scoreboard if on game page
+  if (document.getElementById('page-game').classList.contains('active')) {
+    renderScoreboard(state.players);
+    if (me.isMaster && state.players) renderClickLog(state.players);
+  }
+
+  // Auto-enter game if state says playing
+  if (state.gameStatus === 'playing' &&
+      document.getElementById('page-waiting').classList.contains('active')) {
+    enterGame();
+  }
+
+  // Show winner if finished and announced
+  if (state.gameStatus === 'finished' && state.winner) {
+    if (!document.getElementById('overlay').classList.contains('show')) {
+      showWinner(state.winner);
+    }
+  }
+}
+
+// ── Game ─────────────────────────────────────────────────────────────────────
+function enterGame() {
+  gameRunning = true;
+  showPage('page-game');
+  const name  = document.getElementById('inp-name').value.trim();
+  const house = getHouse();
+  document.getElementById('g-player').textContent =
+    name + ' • ' + (HOUSE_ICONS[house]||'') + ' ' + (HOUSE_NAMES[house]||house);
+
+  // Show correct layout depending on role
+  document.getElementById('player-game-area').style.display = me.isMaster ? 'none' : 'block';
+  document.getElementById('master-game-area').style.display = me.isMaster ? 'block' : 'none';
+  document.getElementById('master-game').style.display      = me.isMaster ? 'block' : 'none';
+
+  updateProgress();
+}
+
+function handleClick(e) {
+  if (!gameRunning || me.isMaster) return;
+  const wrap = document.getElementById('img-right');
+  const rect = wrap.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width;
+  const y = (e.clientY - rect.top)  / rect.height;
+  // Clamp to image bounds
+  if (x < 0 || x > 1 || y < 0 || y > 1) return;
+  sendWS({ type:'click', x, y });
+}
+
+function handleClickResult(msg) {
+  const wrap = document.getElementById('img-right');
+  placeMarker(wrap, msg.x, msg.y, msg.correct);
+
+  me.found       = msg.found;
+  me.totalClicks = msg.totalClicks;
+  updateProgress();
+  document.getElementById('g-clicks').textContent = 'Cliques: ' + me.totalClicks;
+
+  // Start penalty countdown if wrong
+  if (!msg.correct && msg.penaltyMs > 0) {
+    penaltyEnd = Date.now() + msg.penaltyMs;
+    startPenaltyDisplay(msg.penaltyMs);
+  }
+}
+
+// ── Penalty display ───────────────────────────────────────────────────────────
+function startPenaltyDisplay(ms) {
+  // Update the penalty bar every 100ms
+  if (penaltyTimer) clearInterval(penaltyTimer);
+  penaltyEnd = Date.now() + ms;
+  const bar = document.getElementById('penalty-bar');
+  const txt = document.getElementById('penalty-text');
+  bar.style.display = 'block';
+  penaltyTimer = setInterval(() => {
+    const rem = penaltyEnd - Date.now();
+    if (rem <= 0) {
+      clearInterval(penaltyTimer);
+      bar.style.display = 'none';
+      return;
+    }
+    const secs = Math.ceil(rem / 1000);
+    txt.textContent = '⏳ Penalidade! Aguarde ' + secs + 's antes do próximo clique...';
+    // Shrink fill
+    const total = ms;
+    document.getElementById('penalty-fill').style.width = (rem / total * 100) + '%';
+  }, 100);
+}
+
+function showWinnerPending() {
+  const overlay = document.getElementById('pending-overlay');
+  overlay.classList.add('show');
+  // Pulse animation for the cauldron
+  let dots = 0;
+  if (window._pendingDotTimer) clearInterval(window._pendingDotTimer);
+  window._pendingDotTimer = setInterval(() => {
+    dots = (dots + 1) % 4;
+    const el = document.getElementById('pending-dots');
+    if (el) el.textContent = '.'.repeat(dots);
+  }, 500);
+}
+
+function hidePendingOverlay() {
+  document.getElementById('pending-overlay').classList.remove('show');
+  if (window._pendingDotTimer) clearInterval(window._pendingDotTimer);
+}
+
+function showMasterWinnerPreview(winner) {
+  const el = document.getElementById('master-winner-preview');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:1px;margin-bottom:8px;">
+      🏆 VENCEDOR DETECTADO
+    </div>
+    <div style="font-size:15px;font-family:'Cinzel',serif;margin-bottom:4px;">
+      ${HOUSE_ICONS[winner.house]||''} <strong>${winner.name}</strong>
+    </div>
+    <div style="font-size:12px;color:rgba(201,168,76,.7);">
+      Casa ${HOUSE_NAMES[winner.house]||winner.house} &nbsp;·&nbsp; ${winner.totalClicks} cliques &nbsp;·&nbsp; ${winner.totalWrong||0} erros
+    </div>
+  `;
+}
+
+function placeMarker(wrap, x, y, ok) {
+  if (ok) return; // correct clicks: no marker shown — positions stay secret
+  const m = document.createElement('div');
+  m.className = 'marker';
+  m.style.left = (x * 100) + '%';
+  m.style.top  = (y * 100) + '%';
+  m.textContent = '×';
+  wrap.appendChild(m);
+  setTimeout(() => m.remove(), 900);
+}
+
+function updateProgress() {
+  const n   = me.found ? me.found.length : 0;
+  const pct = (n / TOTAL_ERRORS) * 100;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-text').textContent = n + ' / ' + TOTAL_ERRORS;
+  document.getElementById('g-found').textContent   = 'Encontrados: ' + n + '/' + TOTAL_ERRORS;
+}
+
+// ── Scoreboard ───────────────────────────────────────────────────────────────
+function renderScoreboard(players) {
+  const nonMaster = players.filter(p => !p.isMaster)
+    .sort((a,b) => b.found - a.found || (a.totalClicks||0) - (b.totalClicks||0));
+  const medals = ['🥇','🥈','🥉'];
+  const now = Date.now();
+  document.getElementById('scoreboard').innerHTML = nonMaster.map((p,i) => {
+    const isLocked = p.lockedUntil && p.lockedUntil > now;
+    const lockSecs = isLocked ? Math.ceil((p.lockedUntil - now) / 1000) : 0;
+    return `
+    <div class="score-item">
+      <span>
+        ${medals[i]||(i+1)+'.'}
+        <span class="badge badge-${p.house}">${HOUSE_ICONS[p.house]||''} ${HOUSE_NAMES[p.house]||p.house}</span>
+        <span style="font-family:'Cinzel',serif;font-size:12px;margin-left:6px;">${p.name}</span>
+        ${isLocked ? `<span style="color:#ff8080;font-size:10px;margin-left:6px;">⏳ ${lockSecs}s</span>` : ''}
+      </span>
+      <span>
+        <span class="score-count">${p.found}/${TOTAL_ERRORS}</span>
+        ${p.totalClicks !== undefined ? `<span class="score-clicks">(${p.totalClicks} cliques</span>` : ''}
+        ${p.totalWrong  !== undefined ? `<span style="color:#ff8080;font-size:11px;">, ${p.totalWrong} ✗)</span>` : ''}
+      </span>
+    </div>`;
+  }).join('');
+}
+
+function renderClickLog(players) {
+  const nonMaster = players.filter(p => !p.isMaster);
+  document.getElementById('click-log').innerHTML = nonMaster.map(p => {
+    const last5 = (p.clickLog || []).slice(-5).reverse().map(c =>
+      `<span class="${c.correct?'ok-dot':'err-dot'}">${c.correct?'✓':'×'}</span>` +
+      `(${Math.round(c.x*100)}%, ${Math.round(c.y*100)}%)`
+    ).join(' &nbsp;');
+    return `<div class="click-row">
+      <strong style="font-family:'Cinzel',serif;">${p.name}</strong>
+      <div style="margin-top:4px;font-size:11px;color:rgba(201,168,76,.7);">${last5||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Master actions ───────────────────────────────────────────────────────────
+function masterStart()    { sendWS({ type:'master_start' }); }
+function masterAnnounce() { sendWS({ type:'announce_winner' }); }
+function masterReset()    { sendWS({ type:'master_reset' }); }
+
+// ── Game start transition ─────────────────────────────────────────────────────
+function showStartTransition(isSpectatorView = false) {
+  const overlay   = document.getElementById('start-overlay');
+  const countdown = document.getElementById('start-countdown');
+  const msg       = document.getElementById('start-msg');
+  overlay.classList.add('show');
+
+  const messages = [
+    { n: '3', txt: 'Que os melhores olhos vençam...' },
+    { n: '2', txt: 'Os logos estão se escondendo...' },
+    { n: '1', txt: 'Prepare seu feitiço!' },
+    { n: '⚡', txt: 'COMEÇA AGORA!' },
+  ];
+
+  let step = 0;
+  countdown.style.fontSize = '';
+  countdown.textContent = messages[0].n;
+  msg.textContent = messages[0].txt;
+
+  const timer = setInterval(() => {
+    step++;
+    if (step >= messages.length) {
+      clearInterval(timer);
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        if (isSpectatorView) {
+          // Spectator goes to their view — server will send spectator_state
+          showPage('page-spectator');
+          document.getElementById('spec-waiting').style.display = 'none';
+          document.getElementById('spec-playing').style.display = 'block';
+          document.getElementById('spec-status').textContent = 'Desafio em andamento!';
+        } else {
+          enterGame();
+        }
+      }, 600);
+      return;
+    }
+    countdown.textContent = messages[step].n;
+    msg.textContent = messages[step].txt;
+  }, 1000);
+}
+
+// ── Winner announcement transition ───────────────────────────────────────────
+function showWinnerTransition(winner) {
+  const overlay  = document.getElementById('start-overlay');
+  const countdown = document.getElementById('start-countdown');
+  const msg       = document.getElementById('start-msg');
+  overlay.classList.add('show');
+
+  const steps = [
+    { n: '🔮', txt: 'Dumbledore se levanta...' },
+    { n: '📜', txt: 'O pergaminho é consultado...' },
+    { n: '✨', txt: 'O nome está prestes a ser revelado!' },
+    { n: '⚡', txt: 'E O VENCEDOR É...' },
+  ];
+
+  let step = 0;
+  countdown.style.fontSize = 'clamp(50px,11vw,90px)';
+  countdown.textContent = steps[0].n;
+  msg.textContent = steps[0].txt;
+
+  const timer = setInterval(() => {
+    step++;
+    if (step >= steps.length) {
+      clearInterval(timer);
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        countdown.style.fontSize = '';
+        showWinner(winner);
+      }, 700);
+      return;
+    }
+    countdown.textContent = steps[step].n;
+    msg.textContent = steps[step].txt;
+  }, 1200);
+}
+
+// ── Winner overlay ────────────────────────────────────────────────────────────
+let lastRoomPlayers = [];
+
+function showWinner(winner) {
+  document.getElementById('ov-name').textContent  = winner.name;
+  document.getElementById('ov-house').textContent =
+    (HOUSE_ICONS[winner.house] || '') + ' Casa ' + (HOUSE_NAMES[winner.house] || winner.house);
+  document.getElementById('ov-quote').textContent =
+    HOUSE_QUOTES[winner.house] || '';
+  spawnFireworks();
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeOverlay() {
+  document.getElementById('overlay').classList.remove('show');
+  // Master já tem ranking no painel — só jogadores comuns vão para o ranking
+  if (!me.isMaster) showFinalRanking();
+}
+
+function showFinalRanking() {
+  const el = document.getElementById('final-ranking');
+  const players = lastRoomPlayers;
+  if (!players || players.length === 0) return;
+
+  const medals = ['🥇', '🥈', '🥉'];
+  el.innerHTML = players.map((p, i) => {
+    const medal = medals[i] || `${i + 1}º`;
+    const houseIcon = HOUSE_ICONS[p.house] || '';
+    const isWinner = i === 0;
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;
+           padding:12px 16px;margin-bottom:8px;border-radius:8px;
+           background:${isWinner ? 'rgba(201,168,76,.12)' : 'rgba(255,255,255,.04)'};
+           border:1px solid ${isWinner ? 'rgba(201,168,76,.5)' : 'rgba(255,255,255,.08)'};">
+        <span style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">${medal}</span>
+          <span class="badge badge-${p.house}">${houseIcon} ${HOUSE_NAMES[p.house]||p.house}</span>
+          <span style="font-family:'Cinzel',serif;font-size:13px;
+                color:${isWinner ? 'var(--gold)' : 'var(--parchment)'};">${p.name}</span>
+        </span>
+        <span style="text-align:right;">
+          <span style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);">
+            ${p.found}/${TOTAL_ERRORS}
+          </span>
+          <span style="font-size:11px;color:rgba(201,168,76,.5);margin-left:6px;">
+            ${p.totalClicks} cliques · ${p.totalWrong || 0} ✗
+          </span>
+        </span>
+      </div>`;
+  }).join('');
+
+  document.getElementById('ranking-overlay').classList.add('show');
+}
+
+function spawnFireworks() {
+  const fw = document.getElementById('fw');
+  fw.innerHTML = '';
+  const colors = ['#c9a84c','#ff8080','#80ff80','#8080ff','#ffff80','#ff80ff','#80ffff'];
+  for (let i = 0; i < 50; i++) {
+    const s = document.createElement('div');
+    s.className = 'spark';
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top  = Math.random() * 100 + '%';
+    s.style.background = colors[i % colors.length];
+    s.style.setProperty('--dx', (Math.random() - .5) * 320 + 'px');
+    s.style.setProperty('--dy', (Math.random() - .5) * 320 + 'px');
+    s.style.setProperty('--dur',  (1 + Math.random()) + 's');
+    s.style.setProperty('--delay', Math.random() * 1.5 + 's');
+    fw.appendChild(s);
+  }
+}
+
+// ── Spectator functions ───────────────────────────────────────────────────────
+function refreshSpectatorState(state) {
+  const isPlaying = state.gameStatus === 'playing' || state.gameStatus === 'finished';
+  document.getElementById('spec-waiting').style.display  = isPlaying ? 'none'  : 'block';
+  document.getElementById('spec-playing').style.display  = isPlaying ? 'block' : 'none';
+
+  // Waiting: show participants list
+  if (!isPlaying) {
+    document.getElementById('spec-status').textContent = 'Aguardando o início do desafio...';
+    const list = document.getElementById('spec-players-list');
+    list.innerHTML = (state.players || []).map(p => {
+      const icon = HOUSE_ICONS[p.house] || '';
+      return `<li class="player-item">
+        <span class="badge badge-${p.house}">${icon} ${p.house}</span>
+        <span style="flex:1;">${p.name}</span>
+      </li>`;
+    }).join('');
+    return;
+  }
+
+  document.getElementById('spec-status').textContent = 'Desafio em andamento!';
+
+  // Scoreboard
+  const players = state.players || [];
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('spec-scoreboard').innerHTML = players.map((p, i) => `
+    <div class="score-item">
+      <span>
+        ${medals[i] || (i+1)+'.'}
+        <span class="badge badge-${p.house}">${HOUSE_ICONS[p.house]||''} ${HOUSE_NAMES[p.house]||p.house}</span>
+        <span style="font-family:'Cinzel',serif;font-size:12px;margin-left:6px;">${p.name}</span>
+      </span>
+      <span class="score-count">${p.found}/${state.totalErrors || TOTAL_ERRORS}</span>
+    </div>`).join('');
+
+  // Progress bars per player
+  const total = state.totalErrors || TOTAL_ERRORS;
+  document.getElementById('spec-progress-bars').innerHTML = players.map(p => {
+    const pct = Math.round((p.found / total) * 100);
+    return `
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;font-family:'Cinzel',serif;
+             font-size:11px;margin-bottom:4px;">
+          <span>${HOUSE_ICONS[p.house]||''} ${p.name}</span>
+          <span style="color:var(--gold);">${p.found}/${total}</span>
+        </div>
+        <div style="background:rgba(0,0,0,.4);border-radius:20px;height:14px;overflow:hidden;
+             border:1px solid rgba(201,168,76,.2);">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#7a5f25,var(--gold));
+               border-radius:20px;transition:width .5s ease;"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function spectatorShowPending() {
+  showWinnerPending();
+  document.getElementById('spec-status').textContent = 'Um bruxo completou o desafio!';
+}
+
+function spectatorReset() {
+  hidePendingOverlay();
+  document.getElementById('ranking-overlay').classList.remove('show');
+  document.getElementById('pending-overlay').classList.remove('show');
+  showPage('page-spectator');
+  document.getElementById('spec-waiting').style.display = 'block';
+  document.getElementById('spec-playing').style.display = 'none';
+  document.getElementById('spec-status').textContent = 'Aguardando o início do desafio...';
+}
+function showTab(id) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes(id));
+  });
+  document.getElementById(id).classList.add('active');
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function resetLocal() {
+  me.found = []; me.totalClicks = 0; gameRunning = false;
+  penaltyEnd = 0;
+  if (penaltyTimer) { clearInterval(penaltyTimer); penaltyTimer = null; }
+  document.getElementById('prog-fill').style.width = '0%';
+  document.getElementById('prog-text').textContent = '0 / ' + TOTAL_ERRORS;
+  document.getElementById('g-found').textContent   = 'Encontrados: 0/' + TOTAL_ERRORS;
+  document.getElementById('g-clicks').textContent  = 'Cliques: 0';
+  document.getElementById('g-finished').style.display = 'none';
+  document.getElementById('g-pending').style.display  = 'none';
+  hidePendingOverlay();
+  lastRoomPlayers = [];
+  document.getElementById('ranking-overlay').classList.remove('show');
+  document.getElementById('penalty-bar').style.display = 'none';
+  document.getElementById('master-winner-preview').style.display = 'none';
+  document.getElementById('btn-announce').style.display = 'none';
+  document.getElementById('overlay').classList.remove('show');
+  document.querySelectorAll('.marker').forEach(m => m.remove());
+}
+
+// ── Auto-restore session on page reload (master AND players) ─────────────────
+(function restoreSession() {
+  const raw = localStorage.getItem('hp_session');
+  if (!raw) return;
+  let session;
+  try { session = JSON.parse(raw); } catch { return; }
+  if (!session.name || !session.roomId) return;
+
+  // Pre-fill the form
+  document.getElementById('inp-name').value  = session.name;
+  document.getElementById('inp-room').value  = session.roomId;
+
+  if (session.isMaster) {
+    // Master: fill password and hide house section
+    document.getElementById('inp-mpw').value = session.mpw || '';
+    onMasterPwInput(session.mpw || '');
+  } else {
+    // Player: restore house selection
+    if (session.house) {
+      const houseBtn = document.querySelector(`.house-btn.${session.house.toLowerCase()}`);
+      if (houseBtn) pickHouse(houseBtn);
+    }
+  }
+
+  // Auto-reconnect
+  connectWS(() => {
+    sendWS({
+      type:           'join',
+      name:           session.name,
+      house:          session.house || 'Master',
+      roomId:         session.roomId,
+      masterPassword: session.mpw || '',
+    });
+  });
+})();
+
+// Prevent image drag
+document.addEventListener('dragstart', e => e.preventDefault());
+</script>
+</body>
+</html>
